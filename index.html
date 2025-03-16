@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>宇宙給你的指引</title>
+    <!-- 添加 html2canvas 庫用於保存圖片功能 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
             --primary-color: #6200EA;
@@ -78,6 +80,13 @@
             margin-bottom: 2rem;
             text-align: center;
             line-height: 1.6;
+        }
+
+        .visit-counter {
+            font-size: 0.9rem;
+            color: var(--secondary-color);
+            margin-top: 1rem;
+            font-style: italic;
         }
 
         textarea {
@@ -254,6 +263,36 @@
             box-shadow: 0 0 10px white;
         }
 
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .action-button {
+            padding: 0.7rem 1.2rem;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .save-button {
+            background: #9C27B0;
+            color: white;
+        }
+
+        .share-button {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -296,6 +335,12 @@
             50% { transform: translate(0, -10px); }
             100% { transform: translate(0, 0); }
         }
+
+        /* 用於圖片保存時的樣式調整 */
+        .capturing {
+            background: rgba(10, 20, 50, 1) !important;
+            padding: 20px !important;
+        }
     </style>
 </head>
 <body>
@@ -306,6 +351,7 @@
         
         <div class="guidance-section">
             <p class="description">用心聆聽宇宙的聲音，<br>讓星光為你照亮前方的道路。<br>宇宙正等待著與你分享智慧。</p>
+            <div id="visit-counter" class="visit-counter"></div>
             
             <label for="user-feeling" style="display: block; margin-bottom: 0.8rem; text-align: left;">分享你的心情或當前情況：</label>
             <textarea id="user-feeling" placeholder="請分享你目前的心情、遇到的狀況或任何想法..."></textarea>
@@ -323,6 +369,12 @@
                     <h2 class="result-title">宇宙想告訴你⋯⋯</h2>
                     <div class="user-reflection" id="user-reflection" style="display: none; font-size: 0.9rem; margin-bottom: 1rem; color: #B388FF; font-style: italic; text-align: center;"></div>
                     <div class="guidance-message" id="guidance-message"></div>
+                    
+                    <div class="action-buttons">
+                        <button id="save-image-btn" class="action-button save-button">保存為圖片</button>
+                        <button id="share-form-btn" class="action-button share-button">分享體驗</button>
+                    </div>
+                    
                     <button id="close-door" class="close-button">再次探索</button>
                 </div>
             </div>
@@ -357,6 +409,25 @@
             "「懷著惡意去看，每根草都像雜草」",
             "妙禪師父說的都是真的！"
         ];
+        
+        // 訪問計數功能
+        function updateVisitCount() {
+            try {
+                // 獲取全域計數
+                let count = localStorage.getItem('totalExplorations') || 0;
+                // 僅在首次訪問頁面時增加計數
+                if (!sessionStorage.getItem('counted')) {
+                    count = parseInt(count) + 1;
+                    localStorage.setItem('totalExplorations', count);
+                    sessionStorage.setItem('counted', 'true');
+                }
+                
+                // 在頁面顯示
+                document.getElementById('visit-counter').textContent = `已有 ${count} 人次探索宇宙的指引`;
+            } catch (e) {
+                console.error('無法更新訪問計數:', e);
+            }
+        }
         
         // 創建星空背景
         function createStars() {
@@ -614,8 +685,71 @@
                     // 處理訊息斷行
                     const formattedGuidance = formatGuidanceText(guidance);
                     guidanceMessage.innerHTML = formattedGuidance;
+                    
+                    // 設置保存和分享按鈕事件
+                    setupActionButtons(userFeeling, guidance);
                 }, 500);
             }, 500);
+        }
+        
+        // 設置保存和分享按鈕事件
+        function setupActionButtons(userFeeling, guidance) {
+            // 保存圖片按鈕
+            document.getElementById('save-image-btn').onclick = function() {
+                saveAsImage();
+            };
+            
+            // 分享體驗按鈕
+            document.getElementById('share-form-btn').onclick = function() {
+                shareToGoogleForm(userFeeling, guidance);
+            };
+        }
+        
+        // 保存為圖片功能
+        function saveAsImage() {
+            const element = document.querySelector('.door-inner');
+            
+            // 添加臨時類用於截圖樣式調整
+            element.classList.add('capturing');
+            
+            html2canvas(element, {
+                backgroundColor: '#0A0E21',
+                scale: 2, // 更高的分辨率
+                logging: false,
+                useCORS: true
+            }).then(canvas => {
+                // 移除臨時類
+                element.classList.remove('capturing');
+                
+                // 轉換為圖片
+                const image = canvas.toDataURL('image/png');
+                
+                // 創建下載連結
+                const link = document.createElement('a');
+                link.href = image;
+                link.download = '宇宙指引.png';
+                link.click();
+            }).catch(err => {
+                element.classList.remove('capturing');
+                console.error('保存圖片失敗:', err);
+                alert('保存圖片失敗，請重試');
+            });
+        }
+        
+        // 分享到Google表單功能
+        function shareToGoogleForm(feeling, guidance) {
+            // 使用表單URL
+            const baseUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdtq9_vEYayOzns4W73I5F0FI-F0dbwgTuEM8v7KiiVgTcTUA/viewform';
+            
+            // 構建預填URL
+            const params = new URLSearchParams({
+                'usp': 'pp_url',
+                '探索者分享的心情或情況': feeling || '',
+                '宇宙給予的指引': guidance || ''
+            });
+            
+            // 打開預填表單
+            window.open(`${baseUrl}?${params.toString()}`, '_blank');
         }
         
         // 關閉門並重置
@@ -628,20 +762,4 @@
             door.style.opacity = '0';
             
             setTimeout(() => {
-                universeContainer.style.display = 'none';
-                // 清空輸入框以便下次使用
-                document.getElementById('user-feeling').value = '';
-            }, 1000);
-        }
-        
-        // 初始化
-        document.addEventListener('DOMContentLoaded', () => {
-            createStars();
-            
-            // 事件監聽器
-            document.getElementById('draw-button').addEventListener('click', getGuidance);
-            document.getElementById('close-door').addEventListener('click', closeDoor);
-        });
-    </script>
-</body>
-</html>
+                universeContainer.style.
