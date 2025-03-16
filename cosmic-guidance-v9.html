@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宇宙給你的指引</title>
+    <style>
+        :root {
+            --primary-color: #6200EA;
+            --secondary-color: #B388FF;
+            --background-dark: #0A0E21;
+            --text-light: #E0E0FF;
+            --accent-color: #00E5FF;
+            --success-color: #00C853;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--accent-color);
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px var(--accent-color);
+        }
+
+        .guidance-section {
+            background: rgba(30, 40, 70, 0.7);
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            text-align: center;
+        }
+
+        .description {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(10, 20, 50, 0.5);
+            border: 1px solid var(--secondary-color);
+            border-radius: 5px;
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px var(--accent-color);
+        }
+
+        .button {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: block;
+            margin: 0 auto;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(98, 0, 234, 0.5);
+        }
+
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 25px rgba(98, 0, 234, 0.7);
+        }
+
+        .button:active {
+            transform: translateY(1px);
+        }
+
+        .universe-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            z-index: 10;
+            perspective: 1000px;
+        }
+
+        .universe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, #1a237e 0%, #0a0e21 100%);
+            transform-style: preserve-3d;
+            overflow: hidden;
+        }
+
+        .star-particle {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .path {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--accent-color), 0 0 40px var(--accent-color);
+            opacity: 0;
+            z-index: 2;
+        }
+
+        .path-trail {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            opacity: 0;
+            box-shadow: 0 0 10px var(--accent-color);
+            z-index: 1;
+        }
+
+        .door {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotateY(90deg);
+            width: 300px;
+            height: 400px;
+            background: linear-gradient(135deg, #311B92, #7C4DFF);
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(179, 136, 255, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+            transform-style: preserve-3d;
+            opacity: 0;
+        }
+
+        .door-inner {
+            width: 90%;
+            height: 90%;
+            background: rgba(10, 20, 50, 0.8);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.5);
+            transform: translateZ(10px);
+            overflow: hidden;
+        }
+
+        .result-title {
+            color: var(--accent-color);
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .guidance-message {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            text-align: center;
+            padding: 1.2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            max-height: 200px;
+            overflow-y: auto;
+            width: 100%;
+            animation: fadeIn 0.8s ease forwards;
+            border-left: 3px solid var(--success-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-button {
+            background: var(--accent-color);
+            color: var(--background-dark);
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .close-button:hover {
+            background: white;
+            box-shadow: 0 0 10px white;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        #loading-indicator {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--accent-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+
+        @keyframes floating {
+            0% { transform: translate(0, 0); }
+            50% { transform: translate(0, -10px); }
+            100% { transform: translate(0, 0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <div class="container">
+        <h1 class="floating">宇宙給你的指引</h1>
+        
+        <div class="guidance-section">
+            <p class="description">用心聆聽宇宙的聲音，<br>讓星光為你照亮前方的道路。<br>宇宙正等待著與你分享智慧。</p>
+            
+            <label for="user-feeling" style="display: block; margin-bottom: 0.8rem; text-align: left;">分享你的心情或當前情況：</label>
+            <textarea id="user-feeling" placeholder="請分享你目前的心情、遇到的狀況或任何想法..."></textarea>
+            
+            <button id="draw-button" class="button">尋求指引</button>
+        </div>
+    </div>
+    
+    <div class="universe-container" id="universe-container">
+        <div class="universe" id="universe">
+            <div id="star-container"></div>
+            <div class="path" id="path"></div>
+            <div class="door" id="door">
+                <div class="door-inner">
+                    <h2 class="result-title">宇宙想告訴你⋯⋯</h2>
+                    <div class="user-reflection" id="user-reflection" style="display: none; font-size: 0.9rem; margin-bottom: 1rem; color: #B388FF; font-style: italic; text-align: center;"></div>
+                    <div class="guidance-message" id="guidance-message"></div>
+                    <button id="close-door" class="close-button">再次探索</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="loading-indicator">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <script>
+        // 預設的指引訊息列表
+        const guidanceMessages = [
+            "收穫不如突破",
+            "只要心中有 師父， 師父就在！",
+            "如果人只有一生一世，根本不需要修行！修行是為了靈性！",
+            "弟子的心，只要夠正夠強夠定，如來就是你的主！",
+            "一切起伏經歷都是為了到達！",
+            "每個人的中道都不同，但願意照著做， 師父會重新給你指月之路",
+            "繼續善良，保持可愛！",
+            "為自己爭氣，為眾生慈悲",
+            "你是被愛且安全的，不要怕，只要交付！",
+            "正知見．正覺知",
+            "世界很煩，考驗很多，但你依然「要」端正善良",
+            "「照你的信心，給你成全了！」",
+            "「要珍惜，不要怕！我都在！」",
+            "心戒，最輕鬆、也最嚴謹，最嚴格、也最自在。",
+            "你的目標是回家",
+            "「不要滿心想著別人的看法，而要定睛在我。最終，我對你的看法才是最重要的」",
+            "「記得我給你的道路遠比公平更好，我的道路是平安和愛」",
+            "「心懷感恩與信靠，會幫助你用我的眼光來看待事情」",
+            "「懷著惡意去看，每根草都像雜草」",
+            "妙禪師父說的都是真的！"
+        ];
+        
+        // 創建星空背景
+        function createStars() {
+            const stars = document.getElementById('stars');
+            const count = 200;
+            
+            for (let i = 0; i < count; i++) {
+                const star = document.createElement('div');
+                const size = Math.random() * 2;
+                
+                star.style.position = 'absolute';
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.background = 'white';
+                star.style.borderRadius = '50%';
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.opacity = Math.random();
+                star.style.animation = `pulse ${3 + Math.random() * 7}s infinite`;
+                
+                stars.appendChild(star);
+            }
+        }
+        
+        // 生成探索過程中的星光粒子
+        function createStarParticles() {
+            const starContainer = document.getElementById('star-container');
+            starContainer.innerHTML = ''; // 清空先前的星星
+            
+            const count = 150;
+            
+            for (let i = 0; i < count; i++) {
+                const star = document.createElement('div');
+                const size = 0.5 + Math.random() * 3;
+                
+                star.className = 'star-particle';
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.opacity = 0.2 + Math.random() * 0.8;
+                
+                starContainer.appendChild(star);
+            }
+        }
+        
+        // 獲取指引
+        function getGuidance() {
+            // 獲取用戶輸入的心情或情況
+            const userFeeling = document.getElementById('user-feeling').value.trim();
+            
+            // 顯示載入指示器
+            document.getElementById('loading-indicator').style.display = 'block';
+            
+            // 隨機選擇一條指引訊息
+            const randomIndex = Math.floor(Math.random() * guidanceMessages.length);
+            const guidance = guidanceMessages[randomIndex];
+            
+            // 顯示宇宙
+            setTimeout(() => {
+                document.getElementById('loading-indicator').style.display = 'none';
+                createStarParticles();
+                startJourney(guidance, userFeeling);
+            }, 1000);
+        }
+        
+        // 添加路徑軌跡效果
+        function createPathTrail(x, y) {
+            const universe = document.getElementById('universe');
+            const trail = document.createElement('div');
+            trail.className = 'path-trail';
+            
+            const size = 2 + Math.random() * 3;
+            trail.style.width = `${size}px`;
+            trail.style.height = `${size}px`;
+            trail.style.left = `${x}px`;
+            trail.style.top = `${y}px`;
+            trail.style.opacity = '0.8';
+            
+            universe.appendChild(trail);
+            
+            // 淡出效果
+            setTimeout(() => {
+                trail.style.transition = 'all 1.5s ease';
+                trail.style.opacity = '0';
+                setTimeout(() => {
+                    universe.removeChild(trail);
+                }, 1500);
+            }, 50);
+        }
+        
+        // 處理句子斷行
+        function formatGuidanceText(text) {
+            // 特殊句子的處理
+            if (text === "「不要滿心想著別人的看法，而要定睛在我。最終，我對你的看法才是最重要的」") {
+                return "「不要滿心想著別人的看法，<br>而要定睛在我。<br>最終，我對你的看法<br>才是最重要的」";
+            }
+            
+            if (text === "每個人的中道都不同，但願意照著做， 師父會重新給你指月之路") {
+                return "每個人的中道都不同，<br>但願意照著做，<br>師父會重新給你指月之路";
+            }
+            
+            if (text === "「心懷感恩與信靠，會幫助你用我的眼光來看待事情」") {
+                return "「心懷感恩與信靠，<br>會幫助你用我的眼光<br>來看待事情」";
+            }
+            
+            // 一般句子按標點符號斷行
+            const punctuations = ['。', '！', '？', '；', '，', '：', '、'];
+            let parts = [text];
+            
+            // 按標點符號分行
+            for (const punctuation of punctuations) {
+                let newParts = [];
+                for (const part of parts) {
+                    if (part.indexOf(punctuation) === -1) {
+                        newParts.push(part);
+                        continue;
+                    }
+                    
+                    const subParts = part.split(punctuation);
+                    for (let i = 0; i < subParts.length - 1; i++) {
+                        newParts.push(subParts[i] + punctuation);
+                    }
+                    
+                    if (subParts[subParts.length - 1]) {
+                        newParts.push(subParts[subParts.length - 1]);
+                    }
+                }
+                parts = newParts;
+            }
+            
+            // 處理引號，確保引號不會單獨一行
+            for (let i = 0; i < parts.length; i++) {
+                if (parts[i] === '"' || parts[i] === '」') {
+                    if (i > 0) {
+                        parts[i-1] += parts[i];
+                        parts.splice(i, 1);
+                        i--;
+                    }
+                }
+            }
+            
+            // 處理長度超過12個字符的部分
+            const idealLength = 12;
+            let finalParts = [];
+            
+            for (const part of parts) {
+                if (part.length <= idealLength) {
+                    finalParts.push(part);
+                } else {
+                    // 長片段分段
+                    let pos = 0;
+                    while (pos < part.length) {
+                        const len = Math.min(idealLength, part.length - pos);
+                        finalParts.push(part.substring(pos, pos + len));
+                        pos += len;
+                    }
+                }
+            }
+            
+            return finalParts.join('<br>');
+        }
+        
+        // 動畫旅程
+        function startJourney(guidance, userFeeling) {
+            const universeContainer = document.getElementById('universe-container');
+            const path = document.getElementById('path');
+            const door = document.getElementById('door');
+            const guidanceMessage = document.getElementById('guidance-message');
+            const userReflection = document.getElementById('user-reflection');
+            
+            // 清除先前的訊息
+            guidanceMessage.innerHTML = '';
+            userReflection.innerHTML = '';
+            
+            // 顯示宇宙
+            universeContainer.style.display = 'block';
+            
+            // 動畫路徑
+            setTimeout(() => {
+                path.style.transition = 'all 0.5s ease';
+                path.style.opacity = '1';
+                
+                // 隨機路徑移動
+                let pathDuration = 3500; // 3.5 秒
+                let startTime = Date.now();
+                let lastTrailTime = startTime;
+                
+                function movePath() {
+                    let elapsedTime = Date.now() - startTime;
+                    let progress = elapsedTime / pathDuration;
+                    
+                    if (progress >= 1) {
+                        // 路徑結束，顯示門
+                        showDoor(guidance, userFeeling);
+                        return;
+                    }
+                    
+                    // 創建更複雜的隨機移動
+                    let radius = 100 - progress * 70; // 漸漸縮小範圍
+                    let angle = progress * Math.PI * 8; // 多繞幾圈
+                    let wobble = Math.sin(progress * Math.PI * 15) * 20 * (1 - progress); // 加入擾動
+                    
+                    let x = Math.sin(angle) * radius + wobble;
+                    let y = Math.cos(angle) * radius + wobble;
+                    let scale = 1 + progress * 0.5;
+                    
+                    path.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${scale})`;
+                    
+                    // 添加路徑軌跡
+                    const currentTime = Date.now();
+                    if (currentTime - lastTrailTime > 50) { // 每50ms添加一個軌跡
+                        lastTrailTime = currentTime;
+                        // 獲取路徑中心位置
+                        const rect = path.getBoundingClientRect();
+                        const universeRect = document.getElementById('universe').getBoundingClientRect();
+                        const trailX = rect.left + rect.width / 2 - universeRect.left;
+                        const trailY = rect.top + rect.height / 2 - universeRect.top;
+                        createPathTrail(trailX, trailY);
+                    }
+                    
+                    requestAnimationFrame(movePath);
+                }
+                
+                requestAnimationFrame(movePath);
+            }, 500);
+        }
+        
+        // 顯示訊息門
+        function showDoor(guidance, userFeeling) {
+            const path = document.getElementById('path');
+            const door = document.getElementById('door');
+            const guidanceMessage = document.getElementById('guidance-message');
+            const userReflection = document.getElementById('user-reflection');
+            
+            // 淡出路徑
+            path.style.transition = 'all 0.5s ease';
+            path.style.opacity = '0';
+            
+            // 顯示門
+            setTimeout(() => {
+                door.style.transition = 'all 1.5s ease';
+                door.style.opacity = '1';
+                door.style.transform = 'translate(-50%, -50%) rotateY(0deg)';
+                
+                // 顯示用戶的反思（如果有）和指引訊息
+                setTimeout(() => {
+                    if (userFeeling && userFeeling.length > 0) {
+                        userReflection.textContent = `你的心情：「${userFeeling}」`;
+                        userReflection.style.display = 'block';
+                    } else {
+                        userReflection.style.display = 'none';
+                    }
+                    
+                    // 處理訊息斷行
+                    const formattedGuidance = formatGuidanceText(guidance);
+                    guidanceMessage.innerHTML = formattedGuidance;
+                }, 500);
+            }, 500);
+        }
+        
+        // 關閉門並重置
+        function closeDoor() {
+            const universeContainer = document.getElementById('universe-container');
+            const door = document.getElementById('door');
+            
+            door.style.transition = 'all 1s ease';
+            door.style.transform = 'translate(-50%, -50%) rotateY(-90deg)';
+            door.style.opacity = '0';
+            
+            setTimeout(() => {
+                universeContainer.style.display = 'none';
+                // 清空輸入框以便下次使用
+                document.getElementById('user-feeling').value = '';
+            }, 1000);
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            createStars();
+            
+            // 事件監聽器
+            document.getElementById('draw-button').addEventListener('click', getGuidance);
+            document.getElementById('close-door').addEventListener('click', closeDoor);
+        });
+    </script>
+</body>
+</html>
