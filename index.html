@@ -397,6 +397,11 @@
             display: none;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
+
+        /* 隱藏的表單樣式 */
+        #hidden-form {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -478,6 +483,13 @@
     
     <!-- 成功提示 -->
     <div id="success-message" class="success-message">資料已成功送出！</div>
+    
+    <!-- 隱藏的表單，用於實際提交 -->
+    <form id="hidden-form" action="https://docs.google.com/forms/d/e/1D2B9cdK6HA8Q1xGlg8jHZLhbUCmLa2hfh3pWRmCv06U/formResponse" method="POST" target="hidden-iframe">
+        <input type="text" name="entry.194890305" id="form-feeling">
+        <input type="text" name="entry.40169633" id="form-guidance">
+    </form>
+    <iframe name="hidden-iframe" style="display:none;"></iframe>
 
     <script>
         // Google表單相關資訊
@@ -520,34 +532,45 @@
             "妙禪師父說的都是真的！"
         ];
         
-        // 向Google表單提交資料 (延遲提交，不顯示提示)
+        // 向Google表單提交資料 (使用實際表單提交)
         function submitToGoogleForm(userFeeling, guidance) {
             // 防止空白輸入
             if (!userFeeling || userFeeling.trim() === "") {
                 userFeeling = "(未填寫)";
             }
             
-            // 建立表單提交用的URL
-            const formUrl = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse?usp=pp_url&entry.${FEELING_FIELD_ID}=${encodeURIComponent(userFeeling)}&entry.${GUIDANCE_FIELD_ID}=${encodeURIComponent(guidance)}&submit=Submit`;
-            
-            // 使用隱藏的iframe來提交表單，避免頁面重定向
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.setAttribute('name', 'hidden-form-iframe');
-            document.body.appendChild(iframe);
-            
-            // 當iframe載入完成後處理
-            iframe.onload = function() {
-                // 移除iframe
-                setTimeout(() => {
-                    document.body.removeChild(iframe);
-                    isSubmitCompleted = true;
+            try {
+                // 填充隱藏表單
+                document.getElementById('form-feeling').value = userFeeling;
+                document.getElementById('form-guidance').value = guidance;
+                
+                // 提交表單
+                document.getElementById('hidden-form').submit();
+                
+                // 標記完成
+                isSubmitCompleted = true;
+                console.log("表單已提交");
+            } catch (error) {
+                console.error("表單提交出錯:", error);
+                
+                // 備用方法：直接重定向到表單URL
+                try {
+                    const formUrl = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse?usp=pp_url&entry.${FEELING_FIELD_ID}=${encodeURIComponent(userFeeling)}&entry.${GUIDANCE_FIELD_ID}=${encodeURIComponent(guidance)}&submit=Submit`;
                     
-                    // 不顯示成功訊息，保持靜默
-                }, 1000);
-            };
-            
-            iframe.src = formUrl;
+                    const backupFrame = document.createElement('iframe');
+                    backupFrame.style.display = 'none';
+                    backupFrame.src = formUrl;
+                    document.body.appendChild(backupFrame);
+                    
+                    setTimeout(() => {
+                        document.body.removeChild(backupFrame);
+                    }, 2000);
+                    
+                    console.log("使用備用方法提交表單");
+                } catch (backupError) {
+                    console.error("備用提交也失敗:", backupError);
+                }
+            }
         }
         
         // 訪問計數功能
