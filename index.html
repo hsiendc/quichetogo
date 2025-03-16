@@ -381,6 +381,22 @@
             background: rgba(10, 20, 50, 1) !important;
             padding: 20px !important;
         }
+        
+        /* 成功提示 */
+        .success-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--success-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -459,8 +475,27 @@
     <div id="loading-indicator">
         <div class="loading-spinner"></div>
     </div>
+    
+    <!-- 成功提示 -->
+    <div id="success-message" class="success-message">資料已成功送出！</div>
 
     <script>
+        // Google表單相關資訊
+        const FORM_ID = '1D2B9cdK6HA8Q1xGlg8jHZLhbUCmLa2hfh3pWRmCv06U';
+        const FEELING_FIELD_ID = '194890305';
+        const GUIDANCE_FIELD_ID = '40169633';
+        
+        // 當前的指引訊息
+        let currentGuidance = '';
+        
+        // 標記是否需要提交表單
+        let needToSubmitForm = false;
+        let pendingUserFeeling = '';
+        let pendingGuidance = '';
+        
+        // 提交完成標記
+        let isSubmitCompleted = false;
+        
         // 預設的指引訊息列表
         const guidanceMessages = [
             "收穫不如突破",
@@ -484,6 +519,36 @@
             "「懷著惡意去看，每根草都像雜草」",
             "妙禪師父說的都是真的！"
         ];
+        
+        // 向Google表單提交資料 (延遲提交，不顯示提示)
+        function submitToGoogleForm(userFeeling, guidance) {
+            // 防止空白輸入
+            if (!userFeeling || userFeeling.trim() === "") {
+                userFeeling = "(未填寫)";
+            }
+            
+            // 建立表單提交用的URL
+            const formUrl = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse?usp=pp_url&entry.${FEELING_FIELD_ID}=${encodeURIComponent(userFeeling)}&entry.${GUIDANCE_FIELD_ID}=${encodeURIComponent(guidance)}&submit=Submit`;
+            
+            // 使用隱藏的iframe來提交表單，避免頁面重定向
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.setAttribute('name', 'hidden-form-iframe');
+            document.body.appendChild(iframe);
+            
+            // 當iframe載入完成後處理
+            iframe.onload = function() {
+                // 移除iframe
+                setTimeout(() => {
+                    document.body.removeChild(iframe);
+                    isSubmitCompleted = true;
+                    
+                    // 不顯示成功訊息，保持靜默
+                }, 1000);
+            };
+            
+            iframe.src = formUrl;
+        }
         
         // 訪問計數功能
         function updateVisitCount() {
@@ -549,7 +614,7 @@
             }
         }
         
-        // 獲取指引
+        // 獲取指引 (修改為僅設置提交標記)
         function getGuidance() {
             console.log("尋求指引按鈕被點擊");
             // 獲取用戶輸入的心情或情況
@@ -561,6 +626,15 @@
             // 隨機選擇一條指引訊息
             const randomIndex = Math.floor(Math.random() * guidanceMessages.length);
             const guidance = guidanceMessages[randomIndex];
+            
+            // 儲存當前指引以供後續使用
+            currentGuidance = guidance;
+            
+            // 設置待提交的資料
+            needToSubmitForm = true;
+            pendingUserFeeling = userFeeling;
+            pendingGuidance = guidance;
+            isSubmitCompleted = false;
             
             // 顯示宇宙
             setTimeout(() => {
@@ -779,6 +853,12 @@
                     
                     // 設置互動按鈕事件
                     setupActionButtons();
+                    
+                    // 在這裡提交表單資料，門和訊息都已經顯示出來了
+                    if (needToSubmitForm) {
+                        submitToGoogleForm(pendingUserFeeling, pendingGuidance);
+                        needToSubmitForm = false;
+                    }
                 }, 500);
             }, 500);
         }
