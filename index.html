@@ -14,6 +14,7 @@
             --text-light: #E0E0FF;
             --accent-color: #00E5FF;
             --success-color: #00C853;
+            --like-color: #F44336;
         }
 
         * {
@@ -193,10 +194,10 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) rotateY(90deg);
-            width: 300px;
-            height: 400px;
+            width: 320px;
+            height: 500px;
             background: linear-gradient(135deg, #311B92, #7C4DFF);
-            border-radius: 10px;
+            border-radius: 25px;
             box-shadow: 0 0 30px rgba(179, 136, 255, 0.7);
             display: flex;
             align-items: center;
@@ -207,92 +208,129 @@
         }
 
         .door-inner {
-            width: 90%;
-            height: 90%;
-            background: rgba(10, 20, 50, 0.8);
-            border-radius: 8px;
+            width: 92%;
+            height: 92%;
+            background: rgba(16, 24, 48, 0.95);
+            border-radius: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 1rem;
+            justify-content: flex-start;
+            padding: 2rem 1.5rem;
             box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.5);
             transform: translateZ(10px);
             overflow: hidden;
         }
 
         .result-title {
-            color: var(--accent-color);
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
+            color: #00E5FF;
+            font-size: 1.7rem;
+            margin-bottom: 1rem;
             text-align: center;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.6);
+        }
+
+        .user-reflection {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: #B388FF;
+            font-style: italic;
+            text-align: center;
+            display: none;
+            max-width: 100%;
+            word-wrap: break-word;
+            padding: 0 10px;
         }
 
         .guidance-message {
             font-size: 1.2rem;
             line-height: 1.8;
             text-align: center;
-            padding: 1.2rem;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-            max-height: 200px;
+            padding: 1.2rem 1rem;
+            background: rgba(11, 19, 43, 0.7);
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+            height: 230px;
             overflow-y: auto;
             width: 100%;
             animation: fadeIn 0.8s ease forwards;
-            border-left: 3px solid var(--success-color);
+            border-left: 3px solid #4CAF50;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-        }
-
-        .close-button {
-            background: var(--accent-color);
-            color: var(--background-dark);
-            border: none;
-            padding: 0.7rem 1.5rem;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 600;
-            margin-top: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .close-button:hover {
-            background: white;
-            box-shadow: 0 0 10px white;
+            color: white;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            flex-grow: 1;
         }
 
         .action-buttons {
             display: flex;
-            gap: 10px;
-            margin-top: 10px;
-            margin-bottom: 10px;
+            gap: 12px; /* 間距放大1倍 (從6px到12px) */
+            margin: 1rem 0;
+            justify-content: center;
+            background: transparent;
+            padding: 12px;
+            width: 100%;
         }
 
         .action-button {
-            padding: 0.7rem 1.2rem;
-            border-radius: 5px;
-            border: none;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(25, 30, 50, 0.7);
+            border-radius: 50%;
             cursor: pointer;
-            font-weight: 600;
             transition: all 0.3s ease;
-        }
-
-        .save-button {
-            background: #9C27B0;
             color: white;
-        }
-
-        .share-button {
-            background: #4CAF50;
-            color: white;
+            border: 2px solid #00E5FF;
         }
 
         .action-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
+            border-color: #00E5FF;
+        }
+
+        .action-button svg {
+            width: 24px;
+            height: 24px;
+            fill: #00E5FF;
+            display: block;
+        }
+
+        .like-button.active {
+            color: #F44336;
+            background-color: rgba(244, 67, 54, 0.2);
+        }
+        
+        .like-button.active svg {
+            fill: #F44336;
+        }
+
+        /* 提示訊息樣式 */
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            opacity: 0;
+            white-space: nowrap;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .action-button-container {
+            position: relative;
         }
 
         @keyframes fadeIn {
@@ -358,7 +396,7 @@
             <label for="user-feeling" style="display: block; margin-bottom: 0.8rem; text-align: left;">分享你的心情或當前情況：</label>
             <textarea id="user-feeling" placeholder="請分享你目前的心情、遇到的狀況或任何想法..."></textarea>
             
-            <button id="draw-button" class="button">尋求指引</button>
+            <button id="draw-button" class="button" onclick="getGuidance()">尋求指引</button>
         </div>
     </div>
     
@@ -369,15 +407,50 @@
             <div class="door" id="door">
                 <div class="door-inner">
                     <h2 class="result-title">宇宙想告訴你⋯⋯</h2>
-                    <div class="user-reflection" id="user-reflection" style="display: none; font-size: 0.9rem; margin-bottom: 1rem; color: #B388FF; font-style: italic; text-align: center;"></div>
+                    <div class="user-reflection" id="user-reflection"></div>
                     <div class="guidance-message" id="guidance-message"></div>
                     
                     <div class="action-buttons">
-                        <button id="save-image-btn" class="action-button save-button">保存為圖片</button>
-                        <button id="share-form-btn" class="action-button share-button">分享體驗</button>
+                        <!-- 按讚按鈕 (愛心) -->
+                        <div class="action-button-container">
+                            <button id="like-btn" class="action-button like-button">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#00E5FF">
+                                    <path d="M12,21 C10.8,21 2,14.4 2,8.5 C2,5.4 4.4,3 7.5,3 C9.2,3 10.7,3.8 11.8,5 L12,5.2 L12.2,5 C13.3,3.8 14.8,3 16.5,3 C19.6,3 22,5.4 22,8.5 C22,14.4 13.2,21 12,21 Z"/>
+                                </svg>
+                            </button>
+                            <div class="tooltip" id="like-tooltip">按讚</div>
+                        </div>
+                        
+                        <!-- 儲存圖片按鈕 (書籤) -->
+                        <div class="action-button-container">
+                            <button id="save-image-btn" class="action-button save-button">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#00E5FF">
+                                    <path d="M17,3 L7,3 C5.9,3 5,3.9 5,5 L5,21 L12,18 L19,21 L19,5 C19,3.9 18.1,3 17,3 Z"/>
+                                </svg>
+                            </button>
+                            <div class="tooltip" id="save-tooltip">儲存圖片</div>
+                        </div>
+                        
+                        <!-- 分享按鈕 (紙飛機) -->
+                        <div class="action-button-container">
+                            <button id="share-form-btn" class="action-button share-button">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#00E5FF">
+                                    <path d="M21,3 L3,10 L10,12 L12,19 L21,3 Z"/>
+                                </svg>
+                            </button>
+                            <div class="tooltip" id="share-tooltip">複製連結</div>
+                        </div>
+                        
+                        <!-- 再次探索按鈕 (對話泡泡) -->
+                        <div class="action-button-container">
+                            <button id="close-door" class="action-button explore-button" onclick="closeDoor()">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#00E5FF">
+                                    <path d="M12,3 C6.5,3 2,6.6 2,11 C2,13.9 3.6,16.5 6.1,18 L5,21 L8.9,19.5 C9.9,19.8 10.9,20 12,20 C17.5,20 22,16.4 22,11 C22,6.6 17.5,3 12,3 Z"/>
+                                </svg>
+                            </button>
+                            <div class="tooltip" id="explore-tooltip">再次探索</div>
+                        </div>
                     </div>
-                    
-                    <button id="close-door" class="close-button">再次探索</button>
                 </div>
             </div>
         </div>
@@ -400,7 +473,7 @@
             "為自己爭氣，為眾生慈悲",
             "你是被愛且安全的，不要怕，只要交付！",
             "正知見．正覺知",
-            "世界很煩，考驗很多，但你依然「要」端正善良",
+            "世界很煩，考驗很多，但你依然要端正善良",
             "「照你的信心，給你成全了！」",
             "「要珍惜，不要怕！我都在！」",
             "心戒，最輕鬆、也最嚴謹，最嚴格、也最自在。",
@@ -478,6 +551,7 @@
         
         // 獲取指引
         function getGuidance() {
+            console.log("尋求指引按鈕被點擊");
             // 獲取用戶輸入的心情或情況
             const userFeeling = document.getElementById('user-feeling').value.trim();
             
@@ -534,6 +608,15 @@
             
             if (text === "「心懷感恩與信靠，會幫助你用我的眼光來看待事情」") {
                 return "「心懷感恩與信靠，<br>會幫助你用我的眼光<br>來看待事情」";
+            }
+            
+            if (text === "妙禪師父說的都是真的！") {
+                return "妙禪師父說的<br>都是真的！";
+            }
+            
+            // 較短的句子可以直接顯示
+            if (text.length <= 20) {
+                return text;
             }
             
             // 一般句子按標點符號斷行
@@ -595,6 +678,7 @@
         
         // 動畫旅程
         function startJourney(guidance, userFeeling) {
+            console.log("開始旅程");
             const universeContainer = document.getElementById('universe-container');
             const path = document.getElementById('path');
             const door = document.getElementById('door');
@@ -660,6 +744,7 @@
         
         // 顯示訊息門
         function showDoor(guidance, userFeeling) {
+            console.log("顯示門");
             const path = document.getElementById('path');
             const door = document.getElementById('door');
             const guidanceMessage = document.getElementById('guidance-message');
@@ -686,25 +771,125 @@
                     
                     // 處理訊息斷行
                     const formattedGuidance = formatGuidanceText(guidance);
-                    guidanceMessage.innerHTML = formattedGuidance;
                     
-                    // 設置保存和分享按鈕事件
-                    setupActionButtons(userFeeling, guidance);
+                    // 添加綠色邊框並設置訊息樣式
+                    guidanceMessage.innerHTML = formattedGuidance;
+                    guidanceMessage.style.borderLeft = '3px solid #4CAF50';
+                    guidanceMessage.style.boxShadow = '0 0 10px rgba(76, 175, 80, 0.3)';
+                    
+                    // 設置互動按鈕事件
+                    setupActionButtons();
                 }, 500);
             }, 500);
         }
         
-        // 設置保存和分享按鈕事件
-        function setupActionButtons(userFeeling, guidance) {
-            // 保存圖片按鈕
-            document.getElementById('save-image-btn').onclick = function() {
-                saveAsImage();
+        // 設置互動按鈕事件
+        function setupActionButtons() {
+            // 按讚按鈕
+            const likeBtn = document.getElementById('like-btn');
+            likeBtn.onclick = function() {
+                this.classList.toggle('active');
+                if (this.classList.contains('active')) {
+                    showTooltipMessage(this, "已按讚");
+                } else {
+                    showTooltipMessage(this, "取消讚");
+                }
             };
             
-            // 分享體驗按鈕
-            document.getElementById('share-form-btn').onclick = function() {
-                shareToGoogleForm(userFeeling, guidance);
+            // 儲存圖片按鈕
+            document.getElementById('save-image-btn').onclick = function() {
+                saveAsImage();
+                showTooltipMessage(this, "已儲存");
             };
+            
+            // 分享按鈕
+            document.getElementById('share-form-btn').onclick = function() {
+                shareWebpageLink();
+                showTooltipMessage(this, "已複製連結");
+            };
+            
+            // 再次探索按鈕提示
+            const exploreTooltip = document.getElementById('explore-tooltip');
+            document.getElementById('close-door').addEventListener('mouseenter', () => {
+                exploreTooltip.style.opacity = '1';
+            });
+            
+            document.getElementById('close-door').addEventListener('mouseleave', () => {
+                exploreTooltip.style.opacity = '0';
+            });
+            
+            // 添加滑鼠懸停提示
+            setupTooltips();
+        }
+        
+        // 設置提示工具提示
+        function setupTooltips() {
+            const buttons = document.querySelectorAll('.action-button-container');
+            
+            buttons.forEach(btn => {
+                const tooltip = btn.querySelector('.tooltip');
+                const button = btn.querySelector('.action-button');
+                
+                button.addEventListener('mouseenter', () => {
+                    tooltip.style.opacity = '1';
+                });
+                
+                button.addEventListener('mouseleave', () => {
+                    tooltip.style.opacity = '0';
+                });
+            });
+        }
+        
+        // 顯示操作提示消息
+        function showTooltipMessage(element, message) {
+            const tooltipEl = element.parentNode.querySelector('.tooltip');
+            const originalText = tooltipEl.textContent;
+            
+            tooltipEl.textContent = message;
+            tooltipEl.style.opacity = '1';
+            
+            setTimeout(() => {
+                tooltipEl.style.opacity = '0';
+                setTimeout(() => {
+                    tooltipEl.textContent = originalText;
+                }, 300);
+            }, 1500);
+        }
+        
+        // 分享網頁連結功能
+        function shareWebpageLink() {
+            console.log("分享網頁連結");
+            
+            // 取得當前網頁的URL
+            const currentURL = window.location.href;
+            
+            // 創建一個臨時輸入框以複製連結
+            const tempInput = document.createElement('input');
+            tempInput.style.position = 'absolute';
+            tempInput.style.left = '-1000px';
+            tempInput.value = currentURL;
+            document.body.appendChild(tempInput);
+            
+            // 選取並複製連結
+            tempInput.select();
+            document.execCommand('copy');
+            
+            // 移除臨時輸入框
+            document.body.removeChild(tempInput);
+            
+            // 顯示提示訊息
+            alert('網頁連結已複製到剪貼簿！');
+            
+            // 如果瀏覽器支援分享 API，也提供原生分享選項
+            if (navigator.share) {
+                navigator.share({
+                    title: '宇宙給你的指引',
+                    text: '來看看宇宙給我的神秘訊息！',
+                    url: currentURL
+                }).catch(err => {
+                    console.log('分享失敗:', err);
+                });
+            }
         }
         
         // 保存為圖片功能
@@ -738,30 +923,36 @@
             });
         }
         
-        // 分享到Google表單功能
-        function shareToGoogleForm(feeling, guidance) {
-            // 使用表單URL和欄位ID
-            const formId = '1D2B9cdK6HA8Q1xGlg8jHZLhbUCmLa2hfh3pWRmCv06U';
-            const feelingFieldId = '194890305';
-            const guidanceFieldId = '40169633';
-            
-            // 構建預填URL
-            const baseUrl = `https://docs.google.com/forms/d/e/${formId}/viewform`;
-            
-            const params = new URLSearchParams({
-                'usp': 'pp_url',
-                [`entry.${feelingFieldId}`]: feeling || '',
-                [`entry.${guidanceFieldId}`]: guidance || ''
-            });
-            
-            // 打開預填表單
-            window.open(`${baseUrl}?${params.toString()}`, '_blank');
-        }
-        
         // 關閉門並重置
         function closeDoor() {
+            console.log("關閉門");
             const universeContainer = document.getElementById('universe-container');
             const door = document.getElementById('door');
             
             door.style.transition = 'all 1s ease';
-            door.style.transform = 'translate(-50%, -50%) rotateY
+            door.style.transform = 'translate(-50%, -50%) rotateY(90deg)';
+            door.style.opacity = '0';
+            
+            // 稍後隱藏整個宇宙
+            setTimeout(() => {
+                universeContainer.style.display = 'none';
+                
+                // 重置門
+                setTimeout(() => {
+                    door.style.transition = 'none';
+                    door.style.transform = 'translate(-50%, -50%) rotateY(90deg)';
+                    // 重置按讚按鈕
+                    const likeBtn = document.getElementById('like-btn');
+                    likeBtn.classList.remove('active');
+                }, 500);
+            }, 1000);
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            createStars();
+            updateVisitCount();
+        });
+    </script>
+</body>
+</html>
