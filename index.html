@@ -669,15 +669,6 @@
             path.style.transition = 'all 0.5s ease';
             path.style.opacity = '0';
             
-            // 嘗試提交到 Google Forms (如果用戶有輸入心情)
-            if (userFeeling && userFeeling.trim() !== '') {
-                try {
-                    submitToGoogleForms(userFeeling, guidance);
-                } catch (e) {
-                    console.error('提交到Google表單時出錯:', e);
-                }
-            }
-            
             // 顯示門
             setTimeout(() => {
                 door.style.transition = 'all 1.5s ease';
@@ -703,46 +694,6 @@
             }, 500);
         }
         
-        // 嘗試自動提交到 Google Forms
-        function submitToGoogleForms(feeling, guidance) {
-            // 使用預填方式自動提交到表單
-            try {
-                // 創建一個隱藏的表單
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = 'https://docs.google.com/forms/d/e/1FAIpQLSdtq9_vEYayOzns4W73I5F0FI-F0dbwgTuEM8v7KiiVgTcTUA/formResponse';
-                form.target = '_blank';
-                form.style.display = 'none';
-                
-                // 添加表單字段 (使用預定義的字段名稱)
-                // 注意：這些字段名稱需要與 Google Forms 匹配
-                // 您可能需要從 Google Forms 檢查源代碼來獲取確切的字段名稱
-                
-                // 創建心情字段
-                const feelingField = document.createElement('input');
-                feelingField.type = 'text';
-                feelingField.name = 'entry.123456789'; // 替換為實際字段 ID
-                feelingField.value = feeling;
-                form.appendChild(feelingField);
-                
-                // 創建指引字段
-                const guidanceField = document.createElement('input');
-                guidanceField.type = 'text';
-                guidanceField.name = 'entry.987654321'; // 替換為實際字段 ID
-                guidanceField.value = guidance;
-                form.appendChild(guidanceField);
-                
-                // 將表單添加到頁面並提交
-                document.body.appendChild(form);
-                // form.submit(); // 實際使用時取消註釋
-                document.body.removeChild(form);
-                
-                console.log('已嘗試自動提交到 Google Forms');
-            } catch (e) {
-                console.error('自動提交到 Google Forms 時出錯:', e);
-            }
-        }
-        
         // 設置保存和分享按鈕事件
         function setupActionButtons(userFeeling, guidance) {
             // 保存圖片按鈕
@@ -750,3 +701,67 @@
                 saveAsImage();
             };
             
+            // 分享體驗按鈕
+            document.getElementById('share-form-btn').onclick = function() {
+                shareToGoogleForm(userFeeling, guidance);
+            };
+        }
+        
+        // 保存為圖片功能
+        function saveAsImage() {
+            const element = document.querySelector('.door-inner');
+            
+            // 添加臨時類用於截圖樣式調整
+            element.classList.add('capturing');
+            
+            html2canvas(element, {
+                backgroundColor: '#0A0E21',
+                scale: 2, // 更高的分辨率
+                logging: false,
+                useCORS: true
+            }).then(canvas => {
+                // 移除臨時類
+                element.classList.remove('capturing');
+                
+                // 轉換為圖片
+                const image = canvas.toDataURL('image/png');
+                
+                // 創建下載連結
+                const link = document.createElement('a');
+                link.href = image;
+                link.download = '宇宙指引.png';
+                link.click();
+            }).catch(err => {
+                element.classList.remove('capturing');
+                console.error('保存圖片失敗:', err);
+                alert('保存圖片失敗，請重試');
+            });
+        }
+        
+        // 分享到Google表單功能
+        function shareToGoogleForm(feeling, guidance) {
+            // 使用表單URL和欄位ID
+            const formId = '1D2B9cdK6HA8Q1xGlg8jHZLhbUCmLa2hfh3pWRmCv06U';
+            const feelingFieldId = '194890305';
+            const guidanceFieldId = '40169633';
+            
+            // 構建預填URL
+            const baseUrl = `https://docs.google.com/forms/d/e/${formId}/viewform`;
+            
+            const params = new URLSearchParams({
+                'usp': 'pp_url',
+                [`entry.${feelingFieldId}`]: feeling || '',
+                [`entry.${guidanceFieldId}`]: guidance || ''
+            });
+            
+            // 打開預填表單
+            window.open(`${baseUrl}?${params.toString()}`, '_blank');
+        }
+        
+        // 關閉門並重置
+        function closeDoor() {
+            const universeContainer = document.getElementById('universe-container');
+            const door = document.getElementById('door');
+            
+            door.style.transition = 'all 1s ease';
+            door.style.transform = 'translate(-50%, -50%) rotateY
